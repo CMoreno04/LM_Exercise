@@ -15,7 +15,7 @@ def test_get_rules():
 
 def test_verify_compliance():
    
-    assert verify_compliance("rule") == "verify compliance"
+    assert 1 == 0
     
     
 if __name__ == "__main__":
