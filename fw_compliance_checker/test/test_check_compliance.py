@@ -2,7 +2,7 @@
 import pytest
 from src.check_compliance import get_rules, verify_compliance
 
-#Test get rules
+#test get rules
 def test_get_rules():
     rules = get_rules()
     
@@ -12,7 +12,7 @@ def test_get_rules():
     #assert that the list is not empty
     assert len(rules) > 0 
 
-
+#test verify compliance
 def test_verify_compliance():
    
     compliant_rule = {
