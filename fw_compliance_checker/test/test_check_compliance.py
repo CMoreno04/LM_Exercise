@@ -25,21 +25,25 @@ def test_verify_compliance():
     }
     
     non_compliant_rule = {
-        "RuleId": "2",
         "FromPort": 22,
+        "IpRanges": [
+            "91.172.88.105"
+        ],
         "ToPort": 22,
-        "IpRanges": ["236.216.246.119/32"],
         "Action": "Allow",
-        "Direction": "Ingress"
+        "Direction": "Ingress",
+        "RuleId": "9"
     }
     
     compliant_rule_non_ingress = {
-        "RuleId": "3",
-        "FromPort": 22,
-        "ToPort": 22,
-        "IpRanges": ["236.216.246.119/32"],
-        "Action": "Allow",
-        "Direction": "Egress"
+        "FromPort": 80,
+        "IpRanges": [
+            "67.44.208.193/30"
+        ],
+        "ToPort": 80,
+        "Action": "Deny",
+        "Direction": "Egress",
+        "RuleId": "99"
     }
     
     compliant_rule_deny = {
@@ -49,6 +53,17 @@ def test_verify_compliance():
         "IpRanges": ["236.216.246.119/32"],
         "Action": "Deny",
         "Direction": "Ingress"
+    }
+    
+    port_is_minus_one_non_compliant = {
+        "FromPort": -1,
+        "IpRanges": [
+            "91.172.88.105"
+        ],
+        "ToPort": -1,
+        "Action": "Allow",
+        "Direction": "Ingress",
+        "RuleId": "9"
     }
 
     #assert if rule is compliant by port number
@@ -60,6 +75,11 @@ def test_verify_compliance():
     #assert if rule is compliant by Direction
     assert verify_compliance(compliant_rule_non_ingress) == "COMPLIANT"
     
+     #assert if rule is compliant by Action
+    assert verify_compliance(compliant_rule_deny) == "COMPLIANT"
+    
+    #assert if rule is non compliant by port number
+    assert verify_compliance(port_is_minus_one_non_compliant) == "COMPLIANT"
     
 if __name__ == "__main__":
     pytest.main()
