@@ -66,6 +66,17 @@ def test_verify_compliance():
         "RuleId": "9"
     }
 
+    port_is_minus_one_compliant = {
+            "FromPort": -1,
+            "IpRanges": [
+                "92.172.88.105"
+            ],
+            "ToPort": -1,
+            "Action": "Allow",
+            "Direction": "Ingress",
+            "RuleId": "9"
+        }
+    
     #assert if rule is compliant by port number
     assert verify_compliance(compliant_rule) == "COMPLIANT"
     
@@ -75,11 +86,14 @@ def test_verify_compliance():
     #assert if rule is compliant by Direction
     assert verify_compliance(compliant_rule_non_ingress) == "COMPLIANT"
     
-     #assert if rule is compliant by Action
+    #assert if rule is compliant by Action
     assert verify_compliance(compliant_rule_deny) == "COMPLIANT"
     
-    #assert if rule is non compliant by port number
-    assert verify_compliance(port_is_minus_one_non_compliant) == "COMPLIANT"
+    #assert if rule is non compliant with -1 port number
+    assert verify_compliance(port_is_minus_one_non_compliant) == "NON_COMPLIANT"
+    
+    #assert if rule is non compliant with -1 port number
+    assert verify_compliance(port_is_minus_one_compliant) == "COMPLIANT"
     
 if __name__ == "__main__":
     pytest.main()
