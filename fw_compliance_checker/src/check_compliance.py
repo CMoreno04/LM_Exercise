@@ -1,8 +1,43 @@
+# Imports
 import requests
-import urllib.parse
 import json
+import ipaddress
+
+#Constants 
+NON_COMPLIANT_IPS = [
+    "236.216.246.119",
+    "109.3.194.189",
+    "36.229.68.87",
+    "21.90.154.237",
+    "91.172.88.105"
+]
+
+NON_COMPLIANT_PORTS = [22, 80, 443]
 
 API_URL = "https://g326av89lk.execute-api.us-east-1.amazonaws.com/prod/rules"
+
+def verify_compliance(rule):
+    
+    #verify Direction for engress and action deny, to account for -1 ports and compliant directions
+    if rule['Direction'] != "Ingress" or rule['Action'] != 'Allow':
+        return "COMPLIANT"
+    
+    #if Direction is Ingress and Action is Allow.
+        # extract ip from rule and verify against provided ip list
+            # if the ip is within the addreses provided then proceed to validate From and To Port
+                # finally, if ports match 22, 80 or 443 then such rule is NON_COMPLIANT
+    for ip_range in rule['IpRanges']:
+       ip_network = ipaddress.ip_network(ip_range, strict=False)
+       for non_compliant_ip in NON_COMPLIANT_IPS:  
+           if ipaddress.ip_address(non_compliant_ip) in ip_network:
+            if((rule['FromPort'] in NON_COMPLIANT_PORTS or
+                    rule['ToPort'] in NON_COMPLIANT_PORTS or
+                    (rule['FromPort'] <= 22 <= rule['ToPort']) or
+                    (rule['FromPort'] <= 80 <= rule['ToPort']) or
+                    (rule['FromPort'] <= 443 <= rule['ToPort']))):
+                    return "NON_COMPLIANT"
+    return "COMPLIANT"  
+    
 
 #function to fetch firewall rules
 def get_rules():
@@ -45,20 +80,28 @@ def get_rules():
         #should no LastEvaluatedKey be present, finish iterations and return the rules 
         if not last_eval_key:
             break
+        
     #return list with rules obtained from api call
     return rules
         
         
-def verify_compliance(rule):
-    print("verifies compliance")
-    return "verify compliance"
-
-
 def main():
-    print("initialize process")
-    get_rules()
-    verify_compliance("")
-    return "main"
+    print("Collecting Rules...")
+    
+    #collect rules
+    rules = get_rules()
+    result = []
+     
+    #verify compliance for each rule and add them to result
+    for rule in rules: 
+        compliance = verify_compliance(rule)
+        result.append({"RuleId":rule["RuleId"], "Compliance": compliance})
+    
+    #save result in .json file
+    with open('compliance_verification_result.json','w') as f: 
+        json.dump(result, f, indent=4)
+        
+    print("Compliance Verification has been completed! See \'compliance_verification_result.json\' for results.")
     
     
 if __name__ == "__main__":
