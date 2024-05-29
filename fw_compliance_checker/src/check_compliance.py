@@ -12,13 +12,14 @@ NON_COMPLIANT_IPS = [
     "91.172.88.105"
 ]
 
-NON_COMPLIANT_PORTS = [22, 80, 443]
+NON_COMPLIANT_PORTS = [22, 80, 443, -1]
 
 API_URL = "https://g326av89lk.execute-api.us-east-1.amazonaws.com/prod/rules"
 
+#function to verify rule compliance
 def verify_compliance(rule):
     
-    #verify Direction for engress and action deny, to account for -1 ports and compliant directions
+    #verify Direction for Engress and Action Deny 
     if rule['Direction'] != "Ingress" or rule['Action'] != 'Allow':
         return "COMPLIANT"
     
@@ -30,11 +31,7 @@ def verify_compliance(rule):
        ip_network = ipaddress.ip_network(ip_range, strict=False)
        for non_compliant_ip in NON_COMPLIANT_IPS:  
            if ipaddress.ip_address(non_compliant_ip) in ip_network:
-            if((rule['FromPort'] in NON_COMPLIANT_PORTS or
-                    rule['ToPort'] in NON_COMPLIANT_PORTS or
-                    (rule['FromPort'] <= 22 <= rule['ToPort']) or
-                    (rule['FromPort'] <= 80 <= rule['ToPort']) or
-                    (rule['FromPort'] <= 443 <= rule['ToPort']))):
+            if rule['FromPort']in NON_COMPLIANT_PORTS or rule['ToPort'] in NON_COMPLIANT_PORTS:
                     return "NON_COMPLIANT"
     return "COMPLIANT"  
     
