@@ -31,7 +31,11 @@ def verify_compliance(rule):
        ip_network = ipaddress.ip_network(ip_range, strict=False)
        for non_compliant_ip in NON_COMPLIANT_IPS:  
            if ipaddress.ip_address(non_compliant_ip) in ip_network:
-            if rule['FromPort']in NON_COMPLIANT_PORTS or rule['ToPort'] in NON_COMPLIANT_PORTS:
+            if rule['FromPort']in NON_COMPLIANT_PORTS or rule['ToPort'] in NON_COMPLIANT_PORTS or (
+                rule['FromPort'] <= 22 <= rule['ToPort'] or
+                rule['FromPort'] <= 80 <= rule['ToPort'] or
+                rule['FromPort'] <= 443 <= rule['ToPort'] 
+            ):
                     return "NON_COMPLIANT"
     return "COMPLIANT"  
     
